@@ -25,83 +25,53 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Show Android SDK info
+      - name: Accept SDK licenses
         run: |
-          echo "ANDROID_HOME: $ANDROID_HOME"
-          ls $ANDROID_HOME/build-tools/ | tail -3
+          mkdir -p $ANDROID_HOME/licenses
+          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > $ANDROID_HOME/licenses/android-sdk-license
+          echo "84831b9409646a918e30573bab4c9c91346d8abd" >> $ANDROID_HOME/licenses/android-sdk-license
 
-      - name: Accept Android SDK licenses
-        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+      - name: Build Debug APKs
+        run: |
+          ./gradlew assembleDebug \
+            --no-daemon \
+            --stacktrace \
+            -Dorg.gradle.jvmargs="-Xmx2g -XX:+HeapDumpOnOutOfMemoryError"
 
-      - name: Build Debug APKs (all ABIs + universal)
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
-        env:
-          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Xmx1500m"
-
-      - name: List all generated APKs
-        run: find app/build/outputs/apk -name "*.apk" | sort
-
-      - name: Rename APKs for clarity
+      - name: Collect APKs
         run: |
           mkdir -p release_apks
-          for apk in $(find app/build/outputs/apk -name "*.apk"); do
-            name=$(basename "$apk" .apk)
-            cp "$apk" "release_apks/SHSLab-v1.0.0-${name}.apk"
-          done
+          find app/build/outputs/apk -name "*.apk" -exec sh -c \
+            'cp "$1" "release_apks/SHSLab-v1.0.0-$(basename $1)"' _ {} \;
           ls -lh release_apks/
 
-      - name: Upload APK artifacts
+      - name: Upload APKs as artifacts
         uses: actions/upload-artifact@v4
         with:
           name: SHS-Lab-APKs-v1.0.0
           path: release_apks/*.apk
+          retention-days: 30
 
-      - name: Delete old release if exists
-        run: |
-          TAG="v1.0.0"
-          RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG" | \
-            grep '"id"' | head -1 | grep -o '[0-9]*')
-          if [ -n "$RELEASE_ID" ]; then
-            curl -s -X DELETE \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID"
-            echo "Deleted old release $RELEASE_ID"
-          fi
-
-      - name: Create GitHub Release & Upload APKs
+      - name: Create Release with APKs
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v1.0.0
-          name: "SHS Lab v1.0.0 - Heaven for Android Coders 🚀"
+          name: "SHS Lab v1.0.0 - Heaven for Android Coders"
           body: |
             ## SHS Lab v1.0.0
 
-            **Heaven for Android Coders** — Full-featured mobile coding IDE.
+            Full-featured Android coding IDE.
 
-            ### 📦 Download the right APK for your device:
-            | File | Device Type |
-            |------|------------|
-            | `*arm64-v8a*` | Modern Android phones (64-bit ARM) ← **Recommended** |
-            | `*armeabi-v7a*` | Older Android phones (32-bit ARM) |
-            | `*x86_64*` | 64-bit emulators |
-            | `*x86*` | 32-bit emulators |
-            | `*universal*` | Any device (largest file) |
+            ### Download the correct APK for your device:
+            - `arm64-v8a` → Modern phones (64-bit ARM) **Recommended**
+            - `armeabi-v7a` → Older phones (32-bit ARM)  
+            - `universal` → Any device
 
-            ### ✨ Features
-            - 📁 **File Manager** — Browse, create, rename, delete, batch import
-            - 🗜️ **ZIP Engine** — Extract & repack with memory-safe chunked processing
-            - 💻 **Code Editor** — CodeMirror with syntax highlighting for 10+ languages
-            - 🌐 **Live Preview** — Local HTTP server renders HTML/CSS/JS instantly
-            - 🎨 **Glassmorphism UI** — Sleek dark theme optimized for 2GB RAM
-
-            ### 📱 Requirements
-            - Android 5.0+ (API 21) through Android 14 (API 34)
-            - Minimum 2GB RAM (optimized for low-end devices)
-
-            ### ⚠️ Install
-            Enable **"Install unknown apps"** before installing the APK.
+            ### Features
+            - File Manager with batch import/create/rename/delete/ZIP
+            - Integrated Code Editor with syntax highlighting (CodeMirror)
+            - Live Preview via local HTTP server
+            - Android 5.0 to Android 14 support
+            - Optimized for 2GB RAM devices
           files: release_apks/*.apk
-          draft: false
-          prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
