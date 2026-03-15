@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Background Colors - Dark glassmorphism palette -->
+    <color name="bg_dark">#0D1117</color>
+    <color name="primary_dark">#161B22</color>
+    <color name="glass_card">#1A2230</color>
+    <color name="glass_dark">#111827</color>
+    <color name="editor_bg">#0D1117</color>
+    <color name="divider">#21262D</color>
+
+    <!-- Accent Colors -->
+    <color name="accent_cyan">#00F5FF</color>
+    <color name="accent_green">#39FF14</color>
+    <color name="accent_blue">#388BFD</color>
+    <color name="accent_purple">#8957E5</color>
+    <color name="accent_orange">#F78166</color>
+    <color name="accent_yellow">#E3B341</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#E6EDF3</color>
+    <color name="text_secondary">#8B949E</color>
+    <color name="text_dim">#484F58</color>
+
+    <!-- File Type Colors -->
+    <color name="color_folder">#E3B341</color>
+    <color name="color_html">#F16529</color>
+    <color name="color_css">#264DE4</color>
+    <color name="color_js">#F0DB4F</color>
+    <color name="color_php">#777BB3</color>
+    <color name="color_json">#929292</color>
+    <color name="color_zip">#00F5FF</color>
+    <color name="color_image">#FF6B9D</color>
+    <color name="color_code">#39FF14</color>
+    <color name="color_file">#8B949E</color>
+
+    <!-- Status bar -->
+    <color name="colorPrimary">#0D1117</color>
+    <color name="colorPrimaryDark">#0D1117</color>
+    <color name="colorAccent">#00F5FF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>
