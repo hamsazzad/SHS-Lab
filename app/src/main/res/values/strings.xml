@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SHS Lab</string>
+    <string name="file_manager">File Manager</string>
+    <string name="code_editor">Code Editor</string>
+    <string name="live_preview">Live Preview</string>
+    <string name="create_new">Create New</string>
+    <string name="new_folder">New Folder</string>
+    <string name="new_file">New File</string>
+    <string name="rename">Rename</string>
+    <string name="delete">Delete</string>
+    <string name="extract">Extract</string>
+    <string name="compress">Compress</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="empty_folder">📁 Empty folder</string>
+    <string name="storage_permission_required">Storage permission is required to manage files.</string>
+    <string name="permission_denied">Permission denied. Some features may not work.</string>
+</resources>
