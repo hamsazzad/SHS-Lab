@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/editor_bg">
+
+    <!-- Toolbar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/glass_card"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:elevation="4dp">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_arrow_back"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="@color/accent_cyan"
+            android:contentDescription="Back" />
+
+        <TextView
+            android:id="@+id/tv_file_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:maxLines="1"
+            android:ellipsize="middle"
+            android:paddingStart="6dp" />
+
+        <ImageButton
+            android:id="@+id/btn_undo"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_undo"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="@color/text_secondary"
+            android:contentDescription="Undo" />
+
+        <ImageButton
+            android:id="@+id/btn_redo"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_redo"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="@color/text_secondary"
+            android:contentDescription="Redo" />
+
+        <ImageButton
+            android:id="@+id/btn_live_run"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_play"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:tint="@color/accent_green"
+            android:contentDescription="Live Run" />
+
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="SAVE"
+            android:textSize="12sp"
+            android:textColor="@color/bg_dark"
+            android:backgroundTint="@color/accent_cyan"
+            android:layout_marginStart="4dp"
+            style="@style/Widget.Material3.Button" />
+    </LinearLayout>
+
+    <!-- Progress bar for file loading -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:max="100"
+        android:indeterminate="true"
+        android:progressTint="@color/accent_cyan"
+        android:indeterminateTint="@color/accent_cyan"
+        android:visibility="gone" />
+
+    <!-- CodeMirror Editor in WebView -->
+    <WebView
+        android:id="@+id/editor_web_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>
