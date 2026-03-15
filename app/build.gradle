@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.shslab.app"
-        minSdk 19
+        minSdk 21
         targetSdk 34
         versionCode 1
         versionName "1.0.0"
@@ -75,9 +75,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
-    // NanoHTTPD for local HTTP server (Preview feature)
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
-    // Document File for SAF support
     implementation 'androidx.documentfile:documentfile:1.0.1'
     implementation 'androidx.activity:activity-ktx:1.8.2'
     implementation 'androidx.fragment:fragment-ktx:1.6.2'
