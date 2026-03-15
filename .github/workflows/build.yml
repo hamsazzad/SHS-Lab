@@ -3,7 +3,6 @@ name: Build & Release APKs
 on:
   push:
     branches: [ main ]
-    tags: [ 'v*' ]
   workflow_dispatch:
 
 jobs:
@@ -13,7 +12,7 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup JDK 17
@@ -21,64 +20,88 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: ${{ runner.os }}-gradle-
+          cache: gradle
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build Debug APK (all ABIs)
-        run: ./gradlew assembleDebug
+      - name: Show Android SDK info
+        run: |
+          echo "ANDROID_HOME: $ANDROID_HOME"
+          ls $ANDROID_HOME/build-tools/ | tail -3
 
-      - name: List generated APKs
-        run: find app/build/outputs -name "*.apk" | sort
+      - name: Accept Android SDK licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+      - name: Build Debug APKs (all ABIs + universal)
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Xmx1500m"
+
+      - name: List all generated APKs
+        run: find app/build/outputs/apk -name "*.apk" | sort
+
+      - name: Rename APKs for clarity
+        run: |
+          mkdir -p release_apks
+          for apk in $(find app/build/outputs/apk -name "*.apk"); do
+            name=$(basename "$apk" .apk)
+            cp "$apk" "release_apks/SHSLab-v1.0.0-${name}.apk"
+          done
+          ls -lh release_apks/
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SHS-Lab-APKs
-          path: app/build/outputs/apk/**/*.apk
+          name: SHS-Lab-APKs-v1.0.0
+          path: release_apks/*.apk
 
-      - name: Create GitHub Release
-        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
+      - name: Delete old release if exists
+        run: |
+          TAG="v1.0.0"
+          RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG" | \
+            grep '"id"' | head -1 | grep -o '[0-9]*')
+          if [ -n "$RELEASE_ID" ]; then
+            curl -s -X DELETE \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID"
+            echo "Deleted old release $RELEASE_ID"
+          fi
+
+      - name: Create GitHub Release & Upload APKs
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: v1.0.0
-          name: "SHS Lab v1.0.0 - Heaven for Android Coders"
+          name: "SHS Lab v1.0.0 - Heaven for Android Coders 🚀"
           body: |
-            ## SHS Lab v1.0.0 🚀
+            ## SHS Lab v1.0.0
 
-            **Heaven for Android Coders** — Full-featured coding environment for Android.
+            **Heaven for Android Coders** — Full-featured mobile coding IDE.
 
-            ### 📦 APK Downloads
-            Download the APK for your device architecture:
-            - **armeabi-v7a**: Most older Android phones (32-bit ARM)
-            - **arm64-v8a**: Modern Android phones (64-bit ARM) ← Recommended
-            - **x86**: Emulators (32-bit)
-            - **x86_64**: Emulators (64-bit)
-            - **universal**: Works on all devices (larger file size)
+            ### 📦 Download the right APK for your device:
+            | File | Device Type |
+            |------|------------|
+            | `*arm64-v8a*` | Modern Android phones (64-bit ARM) ← **Recommended** |
+            | `*armeabi-v7a*` | Older Android phones (32-bit ARM) |
+            | `*x86_64*` | 64-bit emulators |
+            | `*x86*` | 32-bit emulators |
+            | `*universal*` | Any device (largest file) |
 
             ### ✨ Features
-            - 📁 File Manager with batch import, create, rename, delete
-            - 🗜️ ZIP Engine — extract & repack with memory-safe chunked I/O
-            - 💻 Integrated Code Editor — CodeMirror 5 with syntax highlighting
-            - 🌐 Live Preview — NanoHTTPD local server at localhost:18080
-            - Glassmorphism dark UI optimized for 2GB RAM devices
-            - Supports Android 4.4 (API 19) → Android 14 (API 34)
+            - 📁 **File Manager** — Browse, create, rename, delete, batch import
+            - 🗜️ **ZIP Engine** — Extract & repack with memory-safe chunked processing
+            - 💻 **Code Editor** — CodeMirror with syntax highlighting for 10+ languages
+            - 🌐 **Live Preview** — Local HTTP server renders HTML/CSS/JS instantly
+            - 🎨 **Glassmorphism UI** — Sleek dark theme optimized for 2GB RAM
 
-            ### ⚠️ Installation
-            Enable "Install from Unknown Sources" before installing.
-          files: app/build/outputs/apk/**/*.apk
+            ### 📱 Requirements
+            - Android 5.0+ (API 21) through Android 14 (API 34)
+            - Minimum 2GB RAM (optimized for low-end devices)
+
+            ### ⚠️ Install
+            Enable **"Install unknown apps"** before installing the APK.
+          files: release_apks/*.apk
           draft: false
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
