@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SHS Lab Editor</title>
+<link rel="stylesheet" href="codemirror.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: #0D1117; overflow: hidden; }
+  #editor { height: 100vh; }
+  .CodeMirror {
+    height: 100vh !important;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    background: #0D1117 !important;
+    color: #E6EDF3 !important;
+  }
+  .CodeMirror-gutters {
+    background: #161B22 !important;
+    border-right: 1px solid #21262D !important;
+    min-width: 40px;
+  }
+  .CodeMirror-linenumber {
+    color: #484F58 !important;
+    padding: 0 8px !important;
+  }
+  .CodeMirror-cursor { border-left: 2px solid #00F5FF !important; }
+  .CodeMirror-selected { background: #1f3a5f !important; }
+  .CodeMirror-line { padding-left: 8px !important; }
+
+  /* Syntax highlighting - dark github theme */
+  .cm-keyword { color: #FF7B72; }
+  .cm-atom { color: #79C0FF; }
+  .cm-number { color: #79C0FF; }
+  .cm-string { color: #A5D6FF; }
+  .cm-string-2 { color: #A5D6FF; }
+  .cm-variable { color: #E6EDF3; }
+  .cm-variable-2 { color: #79C0FF; }
+  .cm-variable-3, .cm-type { color: #7EE787; }
+  .cm-comment { color: #8B949E; font-style: italic; }
+  .cm-def { color: #D2A8FF; }
+  .cm-operator { color: #FF7B72; }
+  .cm-property { color: #79C0FF; }
+  .cm-tag { color: #7EE787; }
+  .cm-attribute { color: #79C0FF; }
+  .cm-bracket { color: #E6EDF3; }
+  .cm-qualifier { color: #7EE787; }
+  .cm-builtin { color: #FFDCD7; }
+  .cm-punctuation { color: #E6EDF3; }
+  .cm-meta { color: #E3B341; }
+  .cm-error { color: #F85149; background: rgba(248,81,73,0.1); }
+  .cm-matchingbracket { outline: 1px solid #00F5FF; color: #00F5FF !important; }
+</style>
+</head>
+<body>
+<textarea id="editor"></textarea>
+<script src="codemirror.js"></script>
+<script src="mode/xml/xml.js"></script>
+<script src="mode/javascript/javascript.js"></script>
+<script src="mode/css/css.js"></script>
+<script src="mode/htmlmixed/htmlmixed.js"></script>
+<script src="mode/php/php.js"></script>
+<script src="mode/clike/clike.js"></script>
+<script src="mode/python/python.js"></script>
+<script src="mode/shell/shell.js"></script>
+<script src="mode/sql/sql.js"></script>
+<script src="mode/markdown/markdown.js"></script>
+<script src="addon/edit/matchbrackets.js"></script>
+<script src="addon/edit/closebrackets.js"></script>
+<script src="addon/selection/active-line.js"></script>
+<script>
+var editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+  lineNumbers: true,
+  mode: 'htmlmixed',
+  theme: 'shs-dark',
+  indentUnit: 2,
+  tabSize: 2,
+  indentWithTabs: false,
+  lineWrapping: true,
+  autofocus: true,
+  matchBrackets: true,
+  autoCloseBrackets: true,
+  styleActiveLine: true,
+  extraKeys: {
+    'Ctrl-S': function(cm) {
+      if (typeof AndroidBridge !== 'undefined') AndroidBridge.onSaveShortcut();
+    },
+    'Tab': function(cm) {
+      if (cm.somethingSelected()) cm.indentSelection('add');
+      else cm.replaceSelection('  ', 'end');
+    }
+  }
+});
+
+function getModeForExt(ext) {
+  switch(ext.toLowerCase()) {
+    case 'js': case 'jsx': case 'ts': case 'tsx': return 'javascript';
+    case 'css': return 'css';
+    case 'html': case 'htm': return 'htmlmixed';
+    case 'php': return 'php';
+    case 'xml': case 'svg': return 'xml';
+    case 'json': return {name:'javascript',json:true};
+    case 'java': case 'kt': case 'c': case 'cpp': case 'h': case 'cs': case 'swift': case 'dart': return 'clike';
+    case 'py': return 'python';
+    case 'sh': case 'bash': return 'shell';
+    case 'sql': return 'sql';
+    case 'md': case 'markdown': return 'markdown';
+    default: return 'null';
+  }
+}
+
+function setContent(content, ext) {
+  editor.setValue(content);
+  editor.setOption('mode', getModeForExt(ext));
+  editor.clearHistory();
+  setTimeout(function() { editor.refresh(); editor.focus(); }, 100);
+}
+
+function getContent() {
+  return editor.getValue();
+}
+
+editor.on('change', function() {
+  // onChange hook
+});
+</script>
+</body>
+</html>
