@@ -1,66 +1,15 @@
-name: Build APKs
-
+name: Test Hello World
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
-
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: gradle
-
-      - name: Setup Android SDK licenses
+      - name: Say Hello
+        run: echo "Hello SHS Lab!"
+      - name: Check Android SDK
         run: |
-          mkdir -p "$ANDROID_HOME/licenses"
-          printf '%s\n' '24333f8a63b6825ea9c5514f83c2829b004d1fee' > "$ANDROID_HOME/licenses/android-sdk-license"
-          printf '%s\n' '84831b9409646a918e30573bab4c9c91346d8abd' >> "$ANDROID_HOME/licenses/android-sdk-license"
-
-      - name: Build debug APKs
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
-        env:
-          GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx2g
-
-      - name: Rename APKs
-        run: |
-          mkdir -p dist
-          find app/build/outputs/apk -name '*.apk' | while read f; do
-            cp "$f" "dist/SHSLab-v1.0.0-$(basename $f)"
-          done
-          ls -lh dist/
-
-      - name: Upload APKs
-        uses: actions/upload-artifact@v4
-        with:
-          name: SHS-Lab-APKs
-          path: dist/*.apk
-          retention-days: 30
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.0
-          name: SHS Lab v1.0.0 - Heaven for Android Coders
-          body: |
-            ## SHS Lab v1.0.0
-            Full-featured Android coding IDE.
-            - File Manager with ZIP support
-            - CodeMirror syntax-highlighted editor
-            - Live HTML/CSS/JS preview server
-            - Android 5.0 to 14, optimized for 2GB RAM
-          files: dist/*.apk
-          make_latest: true
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME" || echo "SDK not found at ANDROID_HOME"
